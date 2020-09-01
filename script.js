@@ -3019,7 +3019,7 @@ function time24HR() {
 			reqs: [`math`]
         },
         'factors': {
-        	exec: `var num = parseFloat(text.trim());sendChat((text == "" || isNaN(num))? "This command needs a number to be used." : advFactors(num))`,
+        	exec: `var includeSums = flagTest('', 'sums', 0)? true : false; var num = parseFloat(text.trim()); sendChat((text == "" || isNaN(num))? "This command needs a number to be used." : advFactors(num${includeSums == true? `, true` : ``}))`,
         	alts: [`factor`, `factorsof`],
         	rank: 0,
         	tags: [`normalrank`, `math`, `maths`],
@@ -9290,7 +9290,7 @@ try {
   }
 
   // Calculate the factors of a number
-  function advFactors(n) {
+  function advFactors(n, includeSums) {
 
     // Does 0 have any factors?  I'm using infinity here, correct me if I'm wrong.
     if (n === 0) {
@@ -9318,10 +9318,22 @@ try {
         // Include both positive and negative factors
         if (n>0) {
           factors.push([i, absvalOfN / i]);
+          if (includeSums == true) {
+            factors.push(`${i + (absvaOfN / i)} ::`)
+          }
           factors.push([-i, -absvalOfN / i]);
+          if (includeSums == true) {
+            factors.push(`${-i + (-absvaOfN / i)} ::`)
+          }
         } else {
           factors.push([-i, absvalOfN / i]);
+          if (includeSums == true) {
+            factors.push(`${-i + (absvaOfN / i)} ::`)
+          }
           factors.push([i, -absvalOfN / i]);
+          if (includeSums == true) {
+            factors.push(`${i + (-absvaOfN / i)} ::`)
+          }
         }
       }
     }
@@ -9333,7 +9345,7 @@ try {
       console.log(factors[i]);
     }
 
-    return factors.join(', ');
+    return factors.join(' :: ');
   }
   // end: function advFactors(n)
 
