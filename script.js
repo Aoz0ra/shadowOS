@@ -1,5 +1,17 @@
-
 // 钢琴
+
+
+// NOTES:
+
+/*
+
+09:31:28 | cbb5f3 | ꧁ঔৣ༺Ṡʜäᴅøw-¢ʜäɴ⁘ṀṔⱣṠẹ¢üʀiṭẏ Ċʀẹäṭøʀ༻️ঔৣ꧂:⁘ Nıce ⁘
+09:31:45 | cbb5f3 | ꧁ঔৣ༺Ṡʜäᴅøw-¢ʜäɴ⁘ṀṔⱣṠẹ¢üʀiṭẏ Ċʀẹäṭøʀ༻️ঔৣ꧂:⁘ Wʜeʀe'ᴅ you get tʜat MIDI? ⁘
+09:32:14 | 1265d9 | Alazu:A Japanese Sheet Music sharing website weirdly enough
+09:32:44 | 1265d9 | Alazu:Google "Ichigo's"
+
+*/
+
 
 $.getScript('https://aoz0ra.github.io/mpp.aoz0ra.net/FixedDraw.js');
 $.getScript('https://piano.ourworldofpixels.com/curssettings.js');
@@ -703,7 +715,7 @@ var DOMRenderer = function() {
 		this.blackKeyHeight = Math.floor(this.height * 0.5);
 
 		this.blackKeyOffset = Math.floor(this.whiteKeyWidth - (this.blackKeyWidth / 2));
-		this.keyMovement = Math.floor(this.whiteKeyHeight * 0.015);
+		this.keyMovement = Math.floor(this.whiteKeyHeight * 0.6);
 
 		this.whiteBlipWidth = Math.floor(this.whiteKeyWidth - 1);
 		this.whiteBlipHeight = Math.floor(this.whiteBlipWidth * 1.5);
@@ -720,15 +732,16 @@ var DOMRenderer = function() {
 		this.whiteKeyRender.width = this.whiteKeyWidth;
 		this.whiteKeyRender.height = this.height + 10;
 		var ctx = this.whiteKeyRender.getContext("2d");
-// 		if(ctx.createLinearGradient) {
-// 			var gradient = ctx.createLinearGradient(0, 0, 0, this.whiteKeyHeight);
-// 			gradient.addColorStop(0, "#eee0");
-// 			gradient.addColorStop(0.75, "#fff");
-// 			gradient.addColorStop(1, "#dad4d4");
-// 			ctx.fillStyle = gradient;
-// 		} else {
-			ctx.fillStyle = "#fff4";
-// 		}
+ 		if(ctx.createLinearGradient) {
+ 			var gradient = ctx.createLinearGradient(0, 0, 0, this.whiteKeyHeight);
+ 			gradient.addColorStop(0, "#fff4");
+ 			gradient.addColorStop(0.2, "#fff0");
+ 			gradient.addColorStop(0.8, "#fff0");
+ 			gradient.addColorStop(1, "#fff4");
+ 			ctx.fillStyle = gradient;
+ 		} else {
+			ctx.fillStyle = "#fff2";
+ 		}
 		ctx.strokeStyle = "#000";
 		ctx.lineJoin = "round";
 		ctx.lineCap = "round";
@@ -742,14 +755,16 @@ var DOMRenderer = function() {
 		this.blackKeyRender.width = this.blackKeyWidth + 10;
 		this.blackKeyRender.height = this.blackKeyHeight + 10;
 		var ctx = this.blackKeyRender.getContext("2d");
-// 		if(ctx.createLinearGradient) {
-// 			var gradient = ctx.createLinearGradient(0, 0, 0, this.blackKeyHeight);
-// 			gradient.addColorStop(0, "#000");
-// 			gradient.addColorStop(1, "#444");
-// 			ctx.fillStyle = gradient;
-// 		} else {
+ 		if(ctx.createLinearGradient) {
+ 			var gradient = ctx.createLinearGradient(0, 0, 0, this.blackKeyHeight);
+ 			gradient.addColorStop(0, "#fff4");
+ 			gradient.addColorStop(0.4, "#fff0");
+ 			gradient.addColorStop(0.6, "#fff0");
+ 			gradient.addColorStop(1, "#fff4");
+ 			ctx.fillStyle = gradient;
+ 		} else {
 			ctx.fillStyle = "#0004";
-// 		}
+ 		}
 		ctx.strokeStyle = "#222";
 		ctx.lineJoin = "round";
 		ctx.lineCap = "round";
@@ -836,15 +851,15 @@ var DOMRenderer = function() {
 				if(key.sharp != sharp) continue;
 
 				if(!key.loaded) {
-					this.ctx.globalAlpha = 0.2;
+					this.ctx.globalAlpha = 0.05;
 				} else if(key.timeLoaded > timeLoadedEnd) {
-					this.ctx.globalAlpha = ((now - key.timeLoaded) / 1000) * 0.8 + 0.2;
+					this.ctx.globalAlpha = ((now - key.timeLoaded) / 1000) * 0.95 + 0.05;
 				} else {
 					this.ctx.globalAlpha = 1.0;
 				}
 				var y = 0;
 				if(key.timePlayed > timePlayedEnd) {
-					y = Math.floor(this.keyMovement - (((now - key.timePlayed) / 100) * this.keyMovement));
+					y = Math.floor(this.keyMovement - (((now - key.timePlayed) / 120) * this.keyMovement));
 				}
 				var x = Math.floor(key.sharp ? this.blackKeyOffset + this.whiteKeyWidth * key.spatial
 					: this.whiteKeyWidth * key.spatial);
@@ -1296,6 +1311,30 @@ var DOMRenderer = function() {
 					gPiano.stop(id, gClient.getOwnParticipant(), 0);
 					gClient.stopNote(id);
 					gSustainedNotes[id] = false;
+
+					for (i = 1; i <= octavesBelow; i++) {
+                        var octaveBelowID;
+                        var octavelessNote;
+                        var noteOctave;
+                        if (id.includes(`s`)) {
+                        	noteOctave = parseInt(id.substr(2, id.length));
+                        	octavelessNote = id.substr(0, 2);
+                        }
+                        else {
+                        	noteOctave = parseInt(id.substr(1, id.length));
+                        	octavelessNote = id.substr(0, 1);
+                        }
+
+                        noteOctave -= i;
+
+                        octaveBelowID = `${octavelessNote}${noteOctave}`;
+
+				//for (i = 0; i < pressMultiplier; i++) {
+		        	    gPiano.stop(octaveBelowID, gClient.getOwnParticipant(), 0);
+				    	gClient.stopNote(octaveBelowID);
+					    gSustainedNotes[octaveBelowID] = false;
+			    //}
+			}
 				}
 			}
 		}
@@ -1360,7 +1399,7 @@ var DOMRenderer = function() {
 		});
 	})();
 
-    setTimeout(botSettings.greetFriends = true, 20000)
+    //setTimeout(botSettings.greetFriends = true, 20000)
 
 	// Handle changes to participants
 	(function() {
@@ -1381,6 +1420,10 @@ var DOMRenderer = function() {
 			div.participantId = part.id;
 			div.textContent = part.name || "";
 			div.style.backgroundColor = part.color || "#777";
+			if (friends.includes(part._id)) {
+			    div.style.color = `#ff0`;
+			    div.style.boxShadow = `0 0 1px 1px #ff0 inset, 0 0 1px 1px #ff0, 0 0 1px 1px #000 inset, 0 0 1px 1px #000`
+			}
 			if(gClient.participantId === part.id) {
 				$(div).addClass("me");
 			}
@@ -1853,7 +1896,7 @@ var DOMRenderer = function() {
 	function handleKeyDown(evt) {
 		//console.log(evt);
 		var code = parseInt(evt.keyCode);
-		console.log(`press keycode ${code}`)
+		console.log(`pressed keycode ${code}`)
 		if(key_binding[code] !== undefined) {
 			var binding = key_binding[code];
 			if(!binding.held) {
@@ -1886,19 +1929,28 @@ var DOMRenderer = function() {
 			evt.preventDefault();
 		} else if((code === 38) && transpose_octave < 11) {
 			++transpose_octave;
-			new Notification({title: "OCTAVE", text: `Octave: ${transpose_octave}`})
+			new Notification({title: "OCTAVE", text: `Octave: ${transpose_octave}`, duration: 1700})
 		} else if((code === 40) && transpose_octave > -10) {
 			--transpose_octave;
-			new Notification({title: "OCTAVE", text: `Octave: ${transpose_octave}`})
+			new Notification({title: "OCTAVE", text: `Octave: ${transpose_octave}`, duration: 1700})
 		} else if(code === 37) {
 			++octavesBelow;
-			new Notification({title: "MULTI-OCTAVE", text: `Octaves below: ${octavesBelow}`})
+			new Notification({title: "MULTI-OCTAVE", text: `Octaves below: ${octavesBelow}`, duration: 1700})
 		} else if(code === 39) {
 			--octavesBelow;
-			new Notification({title: "MULTI-OCTAVE", text: `Octaves below: ${octavesBelow}`})
+			new Notification({title: "MULTI-OCTAVE", text: `Octaves below: ${octavesBelow}`, duration: 1700})
 		} else if(code === 192) {
 			playingPrivately = !playingPrivately;
 			new Notification({title: "", text: playingPrivately == true? `now playing privately` : `no longer playing privately`})
+		} else if(code === 220) { // Backslash
+			new Notification({title: "QUICK SETTINGS", html:
+			`<button onclick="location.reload()">restart</button>`+
+			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://www.multiplayerpiano.com:443'; MPP.client.start(); serverSetting = 'mpp'">Back to MPP Standard</button>`+
+			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://ts.terrium.net:8443'; MPP.client.start(); serverSetting = 'terrium'">On to MPPT!</button>`+
+			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://piano.ourworldofpixels.com'; MPP.client.start(); serverSetting = 'owopp'">Let's try for OWOPP</button>`
+			//`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://pianowo-mpp.onthewifi.com:1234'; MPP.client.start();">On to Fishi's MPP!</button>`
+			//`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://104.237.150.24:8513'; MPP.client.start();">On to Bop It's MPP!</button>`
+			, duration: 3000})
 		} else if(code == 9) { // Tab (don't tab away from the piano)
 			evt.preventDefault();
 		} else if(code == 8) { // Backspace (don't navigate Back)
@@ -3019,7 +3071,8 @@ function time24HR() {
 			reqs: [`math`]
         },
         'factors': {
-        	exec: `var includeSums = flagTest('', 'sums', 0)? true : false; var num = parseFloat(text.trim()); sendChat((text == "" || isNaN(num))? "This command needs a number to be used." : advFactors(num${includeSums == true? `, true` : ``}))`,
+        	//exec: `var includeSums = (flagTest('', 'sums', 0) == true)? true : false; var num = parseFloat(text.trim()); sendChat((text == "" || isNaN(num))? "This command needs a number to be used." : advFactors(num${includeSums == true? `, true` : ``}))`,
+        	exec: `text = text.replace("--sums", "").trim();     var num = parseFloat(text.trim());     sendChat((text == "" || isNaN(num))? "This command needs a number to be used." : advFactors(num, ${flagTest('', 'sums', text, 0) != false}) )`, // (flagTest('', 'sums', 0) == true)? true : false;
         	alts: [`factor`, `factorsof`],
         	rank: 0,
         	tags: [`normalrank`, `math`, `maths`],
@@ -3051,10 +3104,20 @@ function time24HR() {
             reqs: [`math`]
         },
         'heronsformula': {
-        	exec: `if (!args[2] || text == "") {sendChat('Heron\\'s Formula - Calculate a triangle\\'s area from side lengths | Usage: ${botSettings.prefix}${cmd} [a] [b] [c]')} else {sendChat(heronsFormula(args[0], args[1], args[2]))}`,
+        	exec: `if (!args[2] || text == "") {sendChat('Heron\\'s Formula - Calculate a triangle\\'s area from its side lengths | Usage: ${botSettings.prefix}${cmd} [a] [b] [c]')} else {sendChat(heronsFormula(args[0], args[1], args[2]))}`,
         	alts: [`hform`],
         	rank: 0,
-        	tags: [`normalrank`, `math`, `maths`]
+        	tags: [`normalrank`, `math`, `maths`],
+        	info: `Heron's Formula - Calculate a triangle's area from its side lengths`,
+        	reqs: [`math`]
+        },
+        'twopoint': {
+        	exec: `if (!args[2] || text == "") {sendChat("Two-Point Formula: Get a linear function containing the points (arg1, arg2) and (arg3, arg4) | Usage: ${botSettings.newPrefix}${testCommand} [x1] [y1] [x2] [y2]")} else {sendChat(twoPoint(args[0], args[1], args[2], args[3]))}`,
+        	alts: [`2pt`],
+        	rank: 0,
+        	tags: [`normalrank`, `math`, `maths`],
+        	info: `Two-Point Formula: Get a linear function containing the points (arg1, arg2) and (arg3, arg4)`,
+        	reqs: [`math`]
         },
 
 
@@ -3081,7 +3144,7 @@ function time24HR() {
 			else if (text == "nebslobby") {changeRoom("ı || ๖ۣۜ𝓝𝓮𝓫𝓾𝓵𝓪™ [🇬🇧] || ı:'s Lobby")}
 			else if (text == "alone") {changeRoom("Shadow's Alone Time", "right", {visible: false})}`,
 
-			alts: [`waypoint`, `warp`],
+			alts: [`waypoint`, `warp`, `wp`],
 			rank: 3,
 			tags: [`extrahigh`, `rooms`, `grantloves`, `admin`],
 
@@ -3184,7 +3247,7 @@ function time24HR() {
     				sendChat(commandsObject[command].info)
     			}
     			else {
-    				console.log(`evaluating command`)
+    				console.log(`evaluating command "${testCommand}"`)
     				//for (const requisite of commandsObject[command].reqs) {
     				//	if ( failures[commandsObject[command].reqs[requisite]] == false) {
     						eval(commandsObject[command].exec)
@@ -3365,6 +3428,37 @@ function time24HR() {
               debugLine(`/info`, `couldn't find the requested player`)
               sendChat(`${name}, I couldn't find anyone by the name of ${text}`)
             }
+                }
+
+
+
+
+                function colorCmd() {
+                	if (text == "") {
+                var inputColor = getColorName(msg.p.color)
+                sendChat(`${name}, you are ${inputColor}, ${msg.p.color} to be exact.`)
+              } else if (pattern.test(text)) {
+                if (text.length === 4) {
+                  var hexColor = `#${text.charAt(1)}${text.charAt(1)}${text.charAt(2)}${text.charAt(2)}${text.charAt(3)}${text.charAt(3)}`;
+                }
+                else if (text.length === 3) {
+                  var hexColor = `#${text.charAt(0)}${text.charAt(0)}${text.charAt(1)}${text.charAt(1)}${text.charAt(2)}${text.charAt(2)}`;
+                }
+                else if (text.length === 6) {
+                  var hexColor = `#${text.charAt(0)}${text.charAt(1)}${text.charAt(2)}${text.charAt(3)}${text.charAt(4)}${text.charAt(5)}`;
+                }
+                else {
+                  var hexColor = text;
+                }
+                var inputColor = getColorName(hexColor)
+                sendChat(`${name}, ${text} is ${inputColor}.`)
+              } else if (info(text)) {
+                let input = info(text); console.log(`input init to info(${text}), or ${input}`)
+                var inputColor = getColorName(input.color)
+                sendChat(`${name}, ${input.name} is ${inputColor}, ${input.color} to be exact.`)
+              } else if (info(text) === undefined) {
+                sendChat(`${name}, I couldn't find anyone by the name of ${text}`)
+              }
                 }
 
 				function botSettingsCmd() {
@@ -5837,6 +5931,10 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 			},
 
 			send: function(message) {
+				message = message.findReplace(`mispell`, `misspell`)
+				.findReplace(`Bradon`, `Brandon`)
+				.findReplace(`[[GOOGOL]]`, `10,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000`);
+
 				//gClient.sendArray([{m:"a", message: message}]);
 				if (message.startsWith(`?nofont `) || message.startsWith(botSettings.prefix) || message.startsWith(botSettings.newPrefix) || message.startsWith(botSettings.jsCmd)
 				|| message.startsWith(`qhy!`) || message.startsWith(`++`) || message.startsWith(`~`) || message.startsWith(`/`) || message.startsWith(`;`) || message.startsWith(`*`)) {
@@ -5864,8 +5962,17 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 						chat.receive({a: `${err}`, p: {color: `#ff880088`, name: `—→ ⁘ eʀʀoʀ ⁘ ←—`}})
 					}
 				}
-				else {
+				else if (message.startsWith(`?forcefont`)) {
+					message = message.replace(`?forcefont`, ``)
 					sendWithAutoBuffer(`⁘ ${message.split(`b`).join(`ʙ`).split(`d`).join(`ᴅ`).split(`h`).join(`ʜ`).split(`i`).join(`ı`).split(`j`).join(`ȷ`).split(`l`).join(`L`).split(`n`).join(`ɴ`).split(`r`).join(`ʀ`)} ⁘`)
+				}
+				else {
+					if (message.includes(`<`) || message.includes(`://`)) {
+					    sendWithAutoBuffer(message)
+				    }
+				    else {
+				    	sendWithAutoBuffer(`⁘ ${message.split(`b`).join(`ʙ`).split(`d`).join(`ᴅ`).split(`h`).join(`ʜ`).split(`i`).join(`ı`).split(`j`).join(`ȷ`).split(`l`).join(`L`).split(`n`).join(`ɴ`).split(`r`).join(`ʀ`)} ⁘`)
+				    }
 				}
 			},
 
@@ -5905,7 +6012,7 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 
 						var li = $('<li><span class="name"/><span class="message"/>');
 
-						li.find(".name").text(`${time24HR()} | ${narrowIDs == true? (msg.p._id? msg.p._id : `undef`).substring(0, 6) : msg.p._id} | ${msg.p.name}:`);
+						li.find(".name").html(`${time24HR()} | ${narrowIDs == true? (msg.p._id? msg.p._id : `undef`).substring(0, 6) : msg.p._id} | ${friends.includes(msg.p._id)? `<span style="color: #fe4; font-style: italic; mix-blend-mode: screen;">Friend!</span> | ` : ``}${msg.p.name.findReplace(`<`, `&lt;`)}:`);
 						
 					    if (chatMode == `linked html`){
 						    li.find(".message").html(linkify(msg.a));
@@ -6325,7 +6432,8 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 		chat: chat,
 		noteQuota: gNoteQuota,
 		soundSelector: gSoundSelector,
-		Notification: Notification
+		Notification: Notification,
+		changeRoom: changeRoom
 	};
 
 
@@ -7859,7 +7967,7 @@ var botDefaults = {
     enableMulti: true,
     text: `If you see Grant/Casey/ChaseLovesCreamTheRabbit, ban him instantly. They've impersonated others, stole rooms, cyberbullied Hri7566 on YouTube, and is now using a bot website to show fake Gate Keepers.  GRANT DOESN'T DESERVE ANOTHER CHANCE.  EVER.`,
     texts: [
-        `͏If you see Grant/Casey/ChaseLovesCreamTheRabbit, ban him instantly and tell Brandon to ban him from this site until he learns better.  They've impersonated others, stole rooms, cyberbullied Hri7566 on YouTube, has used a bot website to show fake Gate Keepers, and has receltly BANNED ME AND HRI7566.  GRANT DOESN'T DESERVE ANOTHER CHANCE.  EVER.\n | AGAIN, ＩＦ　ＹＯＵ　ＳＥＥ　ＧＲＡＮＴ，　ＴＥＬＬ　ＢＲＡＮＤＯＮ　ＴＨＡＴ　ＨＥ　ＳＨＯＵＬＤ　ＢＥ　ＢＡＮＮＥＤ　ＦＲＯＭ　ＴＨＩＳ　ＷＥＢＳＩＴＥ　ＵＮＴＩＬ　ＨＥ　ＬＥＡＲＮＳ　ＢＥＴＴＥＲ．`,
+        `͏If you see Grant/Casey/ChaseLovesCreamTheRabbit, ban him instantly and tell Brandon to ban him from this site until he learns better.  They've impersonated others, stole rooms, cyberbullied Hri7566 on YouTube, has used a bot website to show fake Gate Keepers, and has recently BANNED ME AND HRI7566.  GRANT DOESN'T DESERVE ANOTHER CHANCE.  EVER.\n | AGAIN, ＩＦ　ＹＯＵ　ＳＥＥ　ＧＲＡＮＴ，　ＴＥＬＬ　ＢＲＡＮＤＯＮ　ＴＨＡＴ　ＨＥ　ＳＨＯＵＬＤ　ＢＥ　ＢＡＮＮＥＤ　ＦＲＯＭ　ＴＨＩＳ　ＷＥＢＳＩＴＥ　ＵＮＴＩＬ　ＨＥ　ＬＥＡＲＮＳ　ＢＥＴＴＥＲ．`,
         `If you see any impersonation going on, ban only the fakers immediately.`,
         `Don't forget to check out the other bots!`,
         `Type /help if you want to see my commands!`,
@@ -8077,6 +8185,7 @@ var friends = [
   //`5c5bbb65bae2b3e7321ddfa6`, // GrantLoves
 
   `5ce52c6017d5e600cc9e100a`, // Hri7566
+  `1295ec8d5fd1f87128083453`,
 
   `e687a73935e2e3fa9380fce6`, // Nebula
   `9876d96dade79d41bcba32e9`,
@@ -8089,6 +8198,7 @@ var friends = [
   `8d7c5b3b45abe1be9455c4c7`, // Intel
 
   `2be5ee032bb30dbe2b4afbb6`, // Fishi
+  `b876646a3fb1a170379109a1`,
 
   `f627cfa7f19de955afa0fccb`, // AsCody94
 
@@ -9319,27 +9429,27 @@ try {
         if (n>0) {
           factors.push([i, absvalOfN / i]);
           if (includeSums == true) {
-            factors.push(`${i + (absvaOfN / i)} ::`)
+            factors.push(`${i + (absvalOfN / i)} ::`)
           }
           factors.push([-i, -absvalOfN / i]);
           if (includeSums == true) {
-            factors.push(`${-i + (-absvaOfN / i)} ::`)
+            factors.push(`${-i + (-absvalOfN / i)} ::`)
           }
         } else {
           factors.push([-i, absvalOfN / i]);
           if (includeSums == true) {
-            factors.push(`${-i + (absvaOfN / i)} ::`)
+            factors.push(`${-i + (absvalOfN / i)} ::`)
           }
           factors.push([i, -absvalOfN / i]);
           if (includeSums == true) {
-            factors.push(`${i + (-absvaOfN / i)} ::`)
+            factors.push(`${i + (-absvalOfN / i)} ::`)
           }
         }
       }
     }
 
     // Test for the console
-    console.log(`[advFactors] FACTORS OF "+n+":\n`+
+    console.log(`[advFactors] FACTORS OF ${n}:\n`+
                 `[advFactors] There are ${factors.length} factor pairs.`);
     for (var i=0; i<factors.length; i++) {
       console.log(factors[i]);
@@ -10397,7 +10507,7 @@ try {
     var part = MPP.client.findParticipantById(msg.id);
 
     // If it's me, return early.
-    if (part._id == MPP.client.user._id) {
+    if (MPP.client.user && (part._id == MPP.client.user._id)) {
 
       return
 
@@ -11431,9 +11541,17 @@ if (botSettings.startupSound.enable == true) {
 
 // from Neb:
 // $("body").append('<div id="1-btn" class="ugly-button" style="bottom: 22px; right: 940px; position: fixed; z-index: 500;">Name here</div>'); $("#1-btn").on("click", function(evt) { });
-$("body").append('<div id="1-btn" class="ugly-button" style="position: fixed; bottom: 35px !important; left: 660px !important; z-index: 500;">Clear chat</div>'); $("#1-btn").on("click", function(evt) { MPP.chat.clear(); });
+$("body").append('<div id="clearchatbtn" class="ugly-button" style="position: fixed; bottom: 35px !important; left: 780px !important; z-index: 500;">Clear chat</div>');
+$("#clearchatbtn").on("click", function(evt) { MPP.chat.clear(); });
 
+$("body").append('<div id="rproombtn" class="ugly-button" style="position: fixed; bottom: 7px !important; left: 780px !important; z-index: 500;">✧𝓡𝓟 𝓡𝓸𝓸𝓶✧</div>');
+$("#rproombtn").on("click", function(evt) { MPP.changeRoom(`✧𝓡𝓟 𝓡𝓸𝓸𝓶✧`); });
 
+$("body").append('<div id="testawkwardbtn" class="ugly-button" style="position: fixed; bottom: 35px !important; left: 900px !important; z-index: 500;">test/awkward</div>');
+$("#testawkwardbtn").on("click", function(evt) { MPP.changeRoom(`test/awkward`); });
+
+$("body").append('<div id="testfishingbtn" class="ugly-button" style="position: fixed; bottom: 7px !important; left: 900px !important; z-index: 500;">test/fishing</div>');
+$("#testfishingbtn").on("click", function(evt) { MPP.changeRoom(`test/fishing`); });
 
 
 
