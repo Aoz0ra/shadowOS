@@ -14,8 +14,8 @@
 
 
 $.getScript('https://aoz0ra.github.io/mpp.aoz0ra.net/FixedDraw.js');
-$.getScript('https://piano.ourworldofpixels.com/curssettings.js');
-$.getScript('https://piano.ourworldofpixels.com/addon.js');
+$.getScript('https://aoz0ra.github.io/mpp.aoz0ra.net/curssettings.js');
+$.getScript('https://aoz0ra.github.io/mpp.aoz0ra.net/addon.js');
 
 $(function() {
 
