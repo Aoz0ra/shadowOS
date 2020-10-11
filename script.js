@@ -1359,16 +1359,24 @@ var DOMRenderer = function() {
 			    }
 
 			    for (var ob = 2; ob <= (octavesBelow + 1); ob++) {
+			    	var octaveOffset = ob;
+			    	console.log(octaveOffset)
 
-                    var obNote = `${octavelessNote}${noteOctave - (ob - 1)}`
+                    var obNote = `${octavelessNote}${noteOctave - (octaveOffset - 1)}`
+                    console.log(obNote)
                     obNoteLocation = keyList.indexOf(obNote);
                     obNote = keyList[obNoteLocation + transposeKey];
-					gPiano.play(obNote, vol !== undefined ? noteVolume : DEFAULT_VELOCITY, gClient.getOwnParticipant(), 0)
+					//setTimeout(function(){
+						gPiano.play(obNote, vol !== undefined ? noteVolume : DEFAULT_VELOCITY, gClient.getOwnParticipant(), 0);
+						console.log(`PLAYING NOTE ${obNote}`)
+					//}, i * echoDelay)
 				        
 			        
     
 			        if (playingPrivately == false) {
-				        gClient.startNote(`${octavelessNote}${noteOctave - (ob - 1)}`, noteVolume); 
+				        //setTimeout(function(){
+				        	gClient.startNote(obNote, noteVolume)
+				        //}, i * echoDelay)
 				        
 			        }
 			    }
@@ -1409,9 +1417,9 @@ var DOMRenderer = function() {
 		if(!gClient.preventsPlaying() && gNoteQuota.spend(1)) {
 			gHeldNotes[id] = true;
 		    gSustainedNotes[id] = true;
-		    setTimeout(function(){gPiano.play(id, vol !== undefined ? (vol / i) : DEFAULT_VELOCITY, gClient.getOwnParticipant(), 0)}, i * echoDelay)
+		    gPiano.play(id, vol !== undefined ? vol : DEFAULT_VELOCITY, gClient.getOwnParticipant(), 0)
 		    if (playingPrivately == false) {
-			    setTimeout(function(){gClient.startNote(id, (vol / i))}, i * echoDelay)
+			    gClient.startNote(id, vol)
 			}
 		}
 	}
@@ -1756,7 +1764,6 @@ var DOMRenderer = function() {
 		if(gPianoMutes.indexOf(participant._id) !== -1)
 			return;
 		for(var i = 0; i < msg.n.length; i++) {
-			console.log(msg.n[i].n)
 // 		    if (keyList.indexOf(msg.n[i].n) == -1) {
 // 		    	sendChat(`UNKNOWN NOTE ${msg.n[i].n} FROM ${msg.p}`)
 // 		    }
@@ -1784,7 +1791,7 @@ var DOMRenderer = function() {
 	// Send cursor updates
 	var mx = 0, last_mx = -10, my = 0, last_my = -10;
 	setInterval(function() {
-		if(Math.abs(mx - last_mx) > 0.1 || Math.abs(my - last_my) > 0.1) {
+		if((Math.abs(mx - last_mx) > 0.01 || Math.abs(my - last_my) > 0.01) && botSettings.cursorBot.enable == false) {
 			last_mx = mx;
 			last_my = my;
 			gClient.sendArray([{m: "m", x: mx, y: my}]);
@@ -2141,6 +2148,8 @@ var DOMRenderer = function() {
 			`<button onclick="location.reload()">restart</button>`+
 			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://www.multiplayerpiano.com:443'; MPP.client.start(); serverSetting = 'mpp'">Back to MPP Standard</button>`+
 			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://ts.terrium.net:8443'; MPP.client.start(); serverSetting = 'terrium'">On to MPPT!</button>`+
+			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://mpp1.wolfy.tk'; MPP.client.start(); serverSetting = 'wolfy'">Time for Wolfy's server!</button>`+
+			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://vfd-mppserver.glitch.me/'; MPP.client.start(); serverSetting = 'clone'">Clone it!</button>`+
 			`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://piano.ourworldofpixels.com'; MPP.client.start(); serverSetting = 'owopp'">Let's try for OWOPP</button>`
 			
 			//`<button onclick="MPP.client.stop(); MPP.client.uri = 'wss://pianowo-mpp.onthewifi.com:1234'; MPP.client.start();">On to Fishi's MPP!</button>`
@@ -2900,7 +2909,11 @@ function linkify(inputText) {
 
     // @mentions
     var mentionPattern = /@([!-~ʙᴅʜıȷɴʀ]+)/gim;
-    replacedText = replacedText.replace( mentionPattern, "<span style='color: black; background: yellow'>@$1</span>");
+    replacedText = replacedText.replace(mentionPattern, "<span style='color: black; background: yellow'>@$1</span>");
+
+    // colour codes
+    var colourPattern1 = /(\#[0-9a-fA-F]{6})/gim
+    replacedText = replacedText.replace(colourPattern1, "<button onclick='MPP.chat.send(`/colour $1`)' style='background-color: $1'>$1</button>")
 
     // various emotes
     replacedText = replacedText.findReplace( `:rainbowdashlol:`, '<img src="https://fontstruct.com/avatar/196948/neoqueto.png?version=e75b4782209bd086dc51cceeddeeda3c"></img>', false);
@@ -3360,7 +3373,7 @@ function time24HR() {
         	reqs: [`math`]
         },
         'triangletest': {
-        	exec: `if (!args[2] || text == "") {sendChat('Give the three sides of a triangle, and get the type of triangle it is | Usage: ${botSettings.newPrefix}${testCommand} [a] [b] [c]')} else {sendChat(triangleTest(${args[0]}, ${args[1]}, ${args[2]}))}`,
+        	exec: `if (!args[2] || text == "") {sendChat('Give the three sides of a triangle, and get the type of triangle it is | Usage: ${botSettings.newPrefix}${testCommand} [a] [b] [c]')} else {sendChat((parseFloat(args[0]) && parseFloat(args[1]) && parseFloat(args[2]))? triangleTest(${args[0]},${args[1]},${args[2]}) : 'Error ·:· The arguments weren\\'t numbers')}`,
         	alts: [`tritest`],
         	rank: 0,
         	tags: [`normalrank`, `math`, `maths`, `trigonometry`],
@@ -6192,6 +6205,7 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 				.findReplace(`[[GOOGOL]]`, `10,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000`)
 				.findReplace(`𒐫`, ``)
 				.findReplace(`[[MUSIC]]`, `♫`)
+				.findReplace(`[[WHITE_FLOWER]]`, `💮`)
 
 				//gClient.sendArray([{m:"a", message: message}]);
 				if (message.startsWith(`?nofont `) || message.startsWith(botSettings.prefix) || message.startsWith(botSettings.newPrefix) || message.startsWith(botSettings.jsCmd)
@@ -6217,10 +6231,6 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 						chat.receive({a: `${err}`, p: {color: `#ff880088`, name: `—→ ⁘ eʀʀoʀ ⁘ ←—`}})
 					}
 				}
-				else if (message.startsWith(`?forcefont`)) {
-					message = message.replace(`?forcefont`, ``)
-					sendWithAutoBuffer(`⁘ ${message.split(`b`).join(`ʙ`).split(`d`).join(`ᴅ`).split(`h`).join(`ʜ`).split(`i`).join(`ı`).split(`j`).join(`ȷ`).split(`l`).join(`L`).split(`n`).join(`ɴ`).split(`r`).join(`ʀ`)} ⁘`)
-				}
 				else if (message.startsWith(`→ `)) {
 					message = message.replace(`→ `, `→ ɴow pLayiɴg: `)
 					sendWithAutoBuffer(`⁘ ♫
@@ -6239,7 +6249,8 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 					sendWithAutoBuffer(message.findReplace(`g`, `ɡ`))
 				}
 				else if (message.startsWith(`Gotta Sweep: `)) {
-					sendWithAutoBuffer(message.findReplace(`g`, `ɡ`))
+					sendWithAutoBuffer(makeFont([`𝘼`,`𝘽`,`𝘾`,`𝘿`,`𝙀`,`𝙁`,`𝙂`,`𝙃`,`𝙄`,`𝙅`,`𝙆`,`𝙇`,`𝙈`,`𝙉`,`𝙊`,`𝙋`,`𝙌`,`𝙍`,`𝙎`,`𝙏`,`𝙐`,`𝙑`,`𝙒`,`𝙓`,`𝙔`,`𝙕`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`], message.toUpperCase()))
 				}
 				//𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙
 				//𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗
@@ -6249,7 +6260,7 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 				//𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛
 				//𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩
 				//𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃
-				else if (message.startsWith(`Cream: `)) {
+				else if (message.startsWith(`Cream: `) || message.startsWith(`Scout: `)) {
 					sendWithAutoBuffer(message.findReplace(`a`, `ɑ`).findReplace(`g`, `ɡ`))
 				}
 				else if (message.startsWith(`Sonic: `) || message.startsWith(`Sonica: `) || message.startsWith(`Rainbow Dash: `) || message.startsWith(`?italic `)) {
@@ -6266,6 +6277,97 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 					[`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
 					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`], message.replace(`?script `, ``)))
 				}
+				else if (message.startsWith(`?boldscript `)) {
+					sendWithAutoBuffer(makeFont(
+					[`𝓐`,`𝓑`,`𝓒`,`𝓓`,`𝓔`,`𝓕`,`𝓖`,`𝓗`,`𝓘`,`𝓙`,`𝓚`,`𝓛`,`𝓜`,`𝓝`,`𝓞`,`𝓟`,`𝓠`,`𝓡`,`𝓢`,`𝓣`,`𝓤`,`𝓥`,`𝓦`,`𝓧`,`𝓨`,`𝓩`,
+                    `𝓪`,`𝓫`,`𝓬`,`𝓭`,`𝓮`,`𝓯`,`𝓰`,`𝓱`,`𝓲`,`𝓳`,`𝓴`,`𝓵`,`𝓶`,`𝓷`,`𝓸`,`𝓹`,`𝓺`,`𝓻`,`𝓼`,`𝓽`,`𝓾`,`𝓿`,`𝔀`,`𝔁`,`𝔂`,`𝔃`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
+					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`], message.replace(`?boldscript `, ``)))
+				}
+				else if (message.startsWith(`?bold `)) {
+					sendWithAutoBuffer(makeFont([`𝗔`,`𝗕`,`𝗖`,`𝗗`,`𝗘`,`𝗙`,`𝗚`,`𝗛`,`𝗜`,`𝗝`,`𝗞`,`𝗟`,`𝗠`,`𝗡`,`𝗢`,`𝗣`,`𝗤`,`𝗥`,`𝗦`,`𝗧`,`𝗨`,`𝗩`,`𝗪`,`𝗫`,`𝗬`,`𝗭`,
+                    `𝗮`,`𝗯`,`𝗰`,`𝗱`,`𝗲`,`𝗳`,`𝗴`,`𝗵`,`𝗶`,`𝗷`,`𝗸`,`𝗹`,`𝗺`,`𝗻`,`𝗼`,`𝗽`,`𝗾`,`𝗿`,`𝘀`,`𝘁`,`𝘂`,`𝘃`,`𝘄`,`𝘅`,`𝘆`,`𝘇`,
+                    `𝟬`,`𝟭`,`𝟮`,`𝟯`,`𝟰`,`𝟱`,`𝟲`,`𝟳`,`𝟴`,`𝟵`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
+					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`,
+					`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`], message.replace(`?bold `, ``)))
+				}
+				else if (message.startsWith(`?bolditalic `)) {
+					sendWithAutoBuffer(makeFont([`𝘼`,`𝘽`,`𝘾`,`𝘿`,`𝙀`,`𝙁`,`𝙂`,`𝙃`,`𝙄`,`𝙅`,`𝙆`,`𝙇`,`𝙈`,`𝙉`,`𝙊`,`𝙋`,`𝙌`,`𝙍`,`𝙎`,`𝙏`,`𝙐`,`𝙑`,`𝙒`,`𝙓`,`𝙔`,`𝙕`,
+                    `𝙖`,`𝙗`,`𝙘`,`𝙙`,`𝙚`,`𝙛`,`𝙜`,`𝙝`,`𝙞`,`𝙟`,`𝙠`,`𝙡`,`𝙢`,`𝙣`,`𝙤`,`𝙥`,`𝙦`,`𝙧`,`𝙨`,`𝙩`,`𝙪`,`𝙫`,`𝙬`,`𝙭`,`𝙮`,`𝙯`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
+					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`], message.replace(`?bolditalic `, ``)))
+				}
+				else if (message.startsWith(`?doublestruck `)) {
+					sendWithAutoBuffer(makeFont([`𝔸`,`𝔹`,`ℂ`,`𝔻`,`𝔼`,`𝔽`,`𝔾`,`ℍ`,`𝕀`,`𝕁`,`𝕂`,`𝕃`,`𝕄`,`ℕ`,`𝕆`,`ℙ`,`ℚ`,`ℝ`,`𝕊`,`𝕋`,`𝕌`,`𝕍`,`𝕎`,`𝕏`,`𝕐`,`ℤ`,
+                    `𝕒`,`𝕓`,`𝕔`,`𝕕`,`𝕖`,`𝕗`,`𝕘`,`𝕙`,`𝕚`,`𝕛`,`𝕜`,`𝕝`,`𝕞`,`𝕟`,`𝕠`,`𝕡`,`𝕢`,`𝕣`,`𝕤`,`𝕥`,`𝕦`,`𝕧`,`𝕨`,`𝕩`,`𝕪`,`𝕫`,
+                    `𝟘`,`𝟙`,`𝟚`,`𝟛`,`𝟜`,`𝟝`,`𝟞`,`𝟟`,`𝟠`,`𝟡`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
+					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`,
+					`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`], message.replace(`?doublestruck `, ``)))
+				}
+				else if (message.startsWith(`?sans `)) {
+					sendWithAutoBuffer(makeFont([`𝖠`,`𝖡`,`𝖢`,`𝖣`,`𝖤`,`𝖥`,`𝖦`,`𝖧`,`𝖨`,`𝖩`,`𝖪`,`𝖫`,`𝖬`,`𝖭`,`𝖮`,`𝖯`,`𝖰`,`𝖱`,`𝖲`,`𝖳`,`𝖴`,`𝖵`,`𝖶`,`𝖷`,`𝖸`,`𝖹`,
+                    `𝖺`,`𝖻`,`𝖼`,`𝖽`,`𝖾`,`𝖿`,`𝗀`,`𝗁`,`𝗂`,`𝗃`,`𝗄`,`𝗅`,`𝗆`,`𝗇`,`𝗈`,`𝗉`,`𝗊`,`𝗋`,`𝗌`,`𝗍`,`𝗎`,`𝗏`,`𝗐`,`𝗑`,`𝗒`,`𝗓`,
+                    `𝟢`,`𝟣`,`𝟤`,`𝟥`,`𝟦`,`𝟧`,`𝟨`,`𝟩`,`𝟪`,`𝟫`],
+                    [`A`,`B`,`C`,`D`,`E`,`F`,`G`,`H`,`I`,`J`,`K`,`L`,`M`,`N`,`O`,`P`,`Q`,`R`,`S`,`T`,`U`,`V`,`W`,`X`,`Y`,`Z`,
+					`a`,`b`,`c`,`d`,`e`,`f`,`g`,`h`,`i`,`j`,`k`,`l`,`m`,`n`,`o`,`p`,`q`,`r`,`s`,`t`,`u`,`v`,`w`,`x`,`y`,`z`,
+					`0`,`1`,`2`,`3`,`4`,`5`,`6`,`7`,`8`,`9`], message.replace(`?sans `, ``)))
+				}
+				else if (message.startsWith(`?boldserif `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?italicserif `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?bolditalicserif `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?blocks `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?squares `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?balls `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?bubbles `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?superscript `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?coptic `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?blackletter `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?boldblackletter `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?greek `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?cyrillic `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?shadowchan `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?china `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`?wavy `)) {
+					sendWithAutoBuffer(makeFont([], [], message.replace(`?`, ``)))
+				}
+				else if (message.startsWith(`Fluttershy: `) || message.startsWith(`?superscript `)) {
+					sendWithAutoBuffer(makeFont(
+					`ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᑫᴿᔆᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᑫʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹‧⸴⁽⁾*⁻⁼⁺⠘`.split(``),
+					`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,()*-=+:`.split(``), message.replace(`?superscript `, ``)))
+				}
+				
 				else if (message.startsWith(`Knuckles: `) || message.startsWith(`?smallcaps `)) {
 					sendWithAutoBuffer(makeFont(
 					[`ᴀ`,`ʙ`,`ᴄ`,`ᴅ`,`ᴇ`,`ғ`,`ɢ`,`ʜ`,`ɪ`,`ᴊ`,`ᴋ`,`ʟ`,`ᴍ`,`ɴ`,`ᴏ`,`ᴘ`,`ǫ`,`ʀ`,`s`,`ᴛ`,`ᴜ`,`ᴠ`,`ᴡ`,`x`,`ʏ`,`ᴢ`],
@@ -6294,21 +6396,23 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 					message = message.split(` `);
 
 					for (i = 0; i < message.length; i++) {
-                        if (random(1, 100, true) == 1) {
+						console.log(`PALABRA NUMERO ${i}`)
+                        if (random(1, 20, true) == 1) {
+                        	console.log(`Rolled a d20 and got 1 on word #${i}`)
                         	message[i] = `${message[i].substring(0, 1)}-${message[i]}`
                         }
 					}
 					message = message.join(` `)
 					
 					sendWithAutoBuffer(`
- ${message.split(`a`).join(`ɑ`).split(`g`).join(`ɡ`).split(`w`).join(`ɯ`).split(`y`).join(`ყ`)}`)
+ ${message.split(`a`).join(`ɑ`).split(`g`).join(`ɡ`).split(`q`).join(`ɋ`).split(`w`).join(`ɯ`).split(`y`).join(`ყ`)}`)
 				}
 				else {
-					if (message.includes(`<`) || message.includes(`://`)) {
-					    sendWithAutoBuffer(message)
+					if ( !(message.includes(`<`) || message.includes(`://`)) || message.includes(`?forcefont `)) {
+					    sendWithAutoBuffer(`⁘ ${makeFont(`ʙᴅʜıȷLɴʀᴜᴑɪ᧓ʒᦓ⁊`.split(``), `bdhijlnru012357`.split(``), message)} ⁘`)
 				    }
 				    else {
-				    	sendWithAutoBuffer(`⁘ ${message.split(`b`).join(`ʙ`).split(`d`).join(`ᴅ`).split(`h`).join(`ʜ`).split(`i`).join(`ı`).split(`j`).join(`ȷ`).split(`l`).join(`L`).split(`n`).join(`ɴ`).split(`r`).join(`ʀ`)} ⁘`)
+				    	sendWithAutoBuffer(message.replace(`?forcefont `, ``))
 				    }
 				}
 			},
@@ -6409,12 +6513,13 @@ if (args[1] && args[1].toLowerCase() == `oxygen`) {
 	}
 
 	function makeFont(fontChars, initialChars, text) {
+		if (typeof fontChars == `string`) {
+            fontChars = fontChars.split();
+            initialChars = initialChars.split();
+		}
 		if (fontChars.length == initialChars.length) {
             var fontifiedString = text;
-            if (typeof fontChars == `string`) {
-                fontChars = fontChars.split();
-                initialChars = initialChars.split();
-		    } // else assume arrays
+             // else assume arrays
             for (i = 0; i < fontChars.length; i++) {
                 fontifiedString = fontifiedString.split(initialChars[i]).join(fontChars[i])
             }
@@ -8413,6 +8518,22 @@ var botPresets = {
       `Shadow-chanLovesAmyRose47480794257635487`,
       `Shadow-chanLovesCreamTheRabbit0234672345`,
       `ṪḣëØņęĄńḋØņłÿṠḩäḋøw-¢ħäṅĹõvęś₡ŕėàṁ274873`,
+
+      `Тхе Оне Анд Онлы ꧁ঔৣ༺ Схадощ-чан ༻️ঔৣ꧂`,
+      // transliterated into Russian by Hri7566
+
+      `⁘ Единственный и неповторимый Тень-чан ⁘`,
+      // Yedinstvennyy i nepovtorimyy Ten'-chan
+      // translated to Russian.
+
+      `꧁ঔৣ༺ 唯一無二影-ちゃん愛するクリーム・ザ・ラビット ༻️ঔৣ꧂`,
+      // translated into Japanese by the Sonic News Network's Sonic wiki and Google Translate.
+      // I had room to fit ‘The One and Only Shadow-chanLovesCreamTheRabbit’ and still have room for my styling, and six characters to spare.
+      // Transliteration: Yuiitsu muni (唯一無二 | The One and Only)  kage-chan (影-ちゃん | Shadow-chan) aisuru (愛する | loves) Kurīmu za Rabitto (クリーム・ザ・ラビット | Cream the Rabbit)
+
+      `La Única ꧁ঔৣ༺ Sombra-chan ༻️ঔৣ꧂`,
+      // ¡En español!
+
       `꧁ঔৣ༺ Ṡḩäḋøw The Hedgehog | 50 ༻️ঔৣ꧂`,
     ],
 
@@ -10017,6 +10138,75 @@ catch (err) {
 failures.generalFunctions = false;
 try {
 
+    var kaomojiList = {
+    	feelings: {
+            positive: {
+                excited: [
+                    `(((o(*ﾟ▽ﾟ*)o)))`,`o((*^▽^*))o`,`Ｏ(≧▽≦)Ｏ`,
+                    `o(〃＾▽＾〃)o`,`o(^▽^)o`,`Ｏ(≧∇≦)Ｏ`,
+                    `o(≧∇≦o)`,`σ(≧ε≦ｏ)`,`o(*^▽^*)o`,
+                    `⌒°(❛ᴗ❛)°⌒`,`o(^∀^*)o`,`o(^◇^)o`,
+                    `《《o(≧◇≦)o》》`,`o(*≧□≦)o`,`o(*>ω<*)o`,
+
+                    `(ﾉ･ｪ･)ﾉ`,`(/^▽^)/`,`(ﾉ´ヮ´)ﾉ*:･ﾟ✧`,
+                    `(ﾉ≧∀≦)ﾉ`,`(ﾉ^ヮ^)ﾉ*:・ﾟ✧`,`(/ ‘з’)/`,
+                    `(۶ꈨຶꎁꈨຶ )۶ʸᵉᵃʰᵎ`,`⁽(◍˃̵͈̑ᴗ˂̵͈̑)⁽`,`(╯✧∇✧)╯`,
+                    `Σ(ノ°▽°)ノ`,`( ƅ°ਉ°)ƅ`,`ヽ(　･∀･)ﾉ`,
+                    `˭̡̞(◞⁎˃ᆺ˂)◞*✰`,`(p^-^)p`,`(ﾉ^∇^)ﾉﾟ`,
+                    `ヽ(〃･ω･)ﾉ`,`(۶* ‘ꆚ’)۶”`,`（。＞ω＜）。`,
+                    `（ﾉ｡≧◇≦）ﾉ`,`ヾ(｡･ω･)ｼ`,`(ﾉ･д･)ﾉ`,
+                    `.+:｡(ﾉ･ω･)ﾉﾞ`,`Σ(*ﾉ´>ω<｡\`)ﾉ`,`ヾ（〃＾∇＾）ﾉ♪`,
+                    `.ﾟ☆(ノё∀ё)ノ☆ﾟ.`,`⌒ﾟ(❀>◞౪◟<)ﾟ⌒`,`ヽ/❀o ل͜ o\ﾉ`,
+                    `⤴︎ ε=ε=(ง ˃̶͈̀ᗨ˂̶͈́)۶ ⤴︎`,`୧༼✿ ͡◕ д ◕͡ ༽୨`,
+                ]
+            },
+            neutral: {
+
+            },
+            negative: {
+
+            }
+    	},
+
+    	animals: {
+            pets: {
+
+            },
+            wild: {
+
+            },
+            other: {
+
+            }
+    	},
+
+    	actions: {
+            fun: {
+
+            },
+            neutral: {
+
+            },
+            notFun: {
+
+            },
+            tableFlip: {
+
+            },
+            other: {
+
+            }
+    	},
+
+    	misc: {
+
+    	},
+    }
+
+
+
+
+
 	
 
 var eightballResponses = [
@@ -10069,6 +10259,41 @@ var secondsUptime = 0;
 	setInterval(function() {
 		++secondsUptime;
 	}, 1000)
+
+
+
+
+	// from Fishi:
+	function record(array) {
+		let startTime = Date.now();
+
+		gClient.on(`n`, msg => {
+			array.push({m: `MIDIPLAY`, t: msg.t - startTime, n: msg.n})
+		})
+	}
+
+	function playRecording(array) {
+		array.forEach(evt => {
+			setTimeout(function() {
+				evt.n.forEach(b => {
+					if (!b.d) {b.d = 0;}
+
+					setTimeout(msg => {
+						let index = keyList.indexOf(b.n);
+						pressNoFX(keyList[index+1], b.v);
+					}, b.d)
+				})
+			}, evt.t)
+		})
+	}
+
+	function stopRecording() {
+		gClient._events.n.pop();
+	}
+	// Brilliant work, my friend.
+
+
+
 
 	function unban(player_IDToUnban) {MPP.client.sendArray([{m: "unban", _id: "${player_IDToUnban}"}]);}
 
@@ -10683,7 +10908,7 @@ var secondsUptime = 0;
       throw TypeError('nonCoercible shouldn\'t be called with null or undefined');
     }
 
-    // Turn the arguement into an object
+    // Turn the argument into an object
     const res = Object(val);
 
     // If this is coerced...
