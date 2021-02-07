@@ -14,3 +14,4 @@ Other browsers:  I'm not sure yet
 To do:
 
 - [ ] Update to the latest version
+- [ ] Add https://hri7566.github.io/MarioPaintGuitar to the sound selector
